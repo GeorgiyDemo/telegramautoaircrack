@@ -20,7 +20,7 @@ def GetSSID(firsttime,ssid):
     if firsttime == True:
         global maxrange
         buflist = []
-        p = Popen(['aircrack-ng', 'wpa.cap', '-w','wordlist.txt'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)  
+        p = Popen(['aircrack-ng', 'wpa.cap'], stdout=PIPE, stdin=PIPE, stderr=STDOUT)  
         firstoutput = p.communicate()[0]
         for line in firstoutput.decode().splitlines():
             buflist.append(list(filter(None,[s.replace(' ', '') for s in line.split("  ")])))
